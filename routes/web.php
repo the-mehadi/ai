@@ -19,3 +19,9 @@ Route::post('/chatting', [AiController::class, 'chatting'])->name('chatting');
 Route::get('ai-chat', function () {
     return (new ChatAgent)->stream('Hi');
 });
+
+Route::get('/api/models', function () {
+    $ollamaUrl = env('OLLAMA_URL', 'http://localhost:11434');
+    $response = Http::get("{$ollamaUrl}/api/tags");
+    return $response->json();
+});

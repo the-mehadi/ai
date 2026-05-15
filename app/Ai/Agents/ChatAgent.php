@@ -15,6 +15,7 @@ use Stringable;
 
 #[Provider(Lab::Ollama)]
 #[Model('gemma3:1b')]
+// #[Model('qwen:1.8b')]
 
 class ChatAgent implements Agent, Conversational, HasTools
 {

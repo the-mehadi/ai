@@ -33,7 +33,8 @@
             <h1 class="text-xl font-semibold tracking-tight text-slate-900">AI Assistant</h1>
         </div>
         <div class="flex items-center gap-2">
-            <span class="text-[10px] font-bold bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded uppercase tracking-wider">Gemma 3:1B</span>
+            <select id="modelSelect" class="text-[12px] font-semibold bg-indigo-100 text-indigo-600 px-3 py-1.5 rounded uppercase tracking-wider border-0 outline-none cursor-pointer">
+            </select>
             <span class="text-[10px] font-bold bg-green-100 text-green-600 px-2 py-0.5 rounded uppercase tracking-wider">Live Stream</span>
         </div>
     </header>
@@ -71,11 +72,33 @@
         const chatForm = document.getElementById('chatForm');
         const chatContainer = document.getElementById('chat');
         const inputField = document.getElementById('input');
+        const modelSelect = document.getElementById('modelSelect');
+
+        async function loadModels() {
+            try {
+                const response = await fetch('/api/models');
+                const data = await response.json();
+                
+                if (data.models && data.models.length > 0) {
+                    data.models.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model.name;
+                        option.textContent = model.name;
+                        modelSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading models:', error);
+            }
+        }
+
+        loadModels();
 
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const message = inputField.value.trim();
+            const selectedModel = modelSelect.value;
             if (!message) return;
 
 
@@ -97,7 +120,7 @@
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                     },
-                    body: JSON.stringify({ input: message })
+                    body: JSON.stringify({ input: message, model: selectedModel })
                 });
 
                 const reader = response.body.getReader();

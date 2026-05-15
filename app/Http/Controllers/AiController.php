@@ -11,10 +11,11 @@ class AiController extends Controller
     public function chatting(Request $request)
     {
         $input = $request->input('input');
+        $model = $request->input('model', 'gemma3:1b');
         if (!$input) {
             return response()->json(['error' => 'No input provided'], 400);
         }
-        return (new ChatAgent)->stream($input);
+        return (new ChatAgent)->stream($input, model: $model);
     }
 
     public function getWebsiteContext()
