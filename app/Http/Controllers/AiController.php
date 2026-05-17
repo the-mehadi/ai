@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Ai\Agents\ChatAgent;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 class AiController extends Controller
@@ -15,7 +18,15 @@ class AiController extends Controller
         if (!$input) {
             return response()->json(['error' => 'No input provided'], 400);
         }
-        return (new ChatAgent)->stream($input, model: $model);
+
+        if(!Auth::check()){
+            Auth::login(User::first());
+        }
+        // $conversationId = $this->resolveConversation($user);
+
+        return (new ChatAgent())
+            ->forUser(Auth::user())
+            ->stream($input, model: $model);
     }
 
     public function getWebsiteContext()
@@ -27,5 +38,12 @@ class AiController extends Controller
         $packages = $response->json();
 
         return json_encode($packages);
+    }
+
+    public function resolveConversation($user)
+    {
+        return  DB::table('agent_conversations')->where('user_id', $user->id)
+                ->latest('updated_at')
+                ->value('id');
     }
 }
